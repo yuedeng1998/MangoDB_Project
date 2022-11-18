@@ -11,8 +11,8 @@ root = db.root
 data = db.data
 
 file_src = 'car.txt'
-data_path = '/epople/pe'
-k = 10
+data_path = '/'
+k = 5
 
 
 def csv2json(csv_path, pk):
@@ -82,21 +82,33 @@ def put(data_path, file_src):
     _id = dirs[1]
     # the rest of the data_path in the format of 'dsd.new_dict'
     subpath = ".".join(dirs[2:])
+    # print(subpath)
     filename = file_src.split('/')[-1]
-    subpath += '.' + filename
-    filter = {"_id": _id}
     # {'p1':'address1'},{'p2': 'a2'}..
     file_content = {}
     for i, data_id in enumerate(data_ids):
         file_content['p'+str(i)] = str(data_id)
+    # handle special cases; when add file from root
+    if not subpath:
+        # if store on root, insert hello.txt as _id and 'p1':'a1'...
+        file_content = {'_id': filename}
+        for i, data_id in enumerate(data_ids):
+            file_content['p'+str(i)] = str(data_id)
+        root.insert_one(file_content)
+
+    else:
+        subpath += '.' + filename
+
+        filter = {"_id": _id}
+
     # the content under the file object {'wold.txt': {'p1':'address1'},{'p2': 'a2'}... }
-    newvalues = {"$set": {subpath: file_content}}
+        newvalues = {"$set": {subpath: file_content}}
 
     # if the sub root folder not exist, insert a new one
-    if not root.find_one(filter):
-        root.insert_one({'_id': _id, 'is_dict': True})
+        if not root.find_one(filter):
+            root.insert_one({'_id': _id, 'is_dict': True})
         # update the value to add the dict
-    root.update_one(filter, newvalues)
+        root.update_one(filter, newvalues)
 
 
 put(data_path, file_src)
