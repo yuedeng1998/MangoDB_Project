@@ -19,7 +19,6 @@ def getPartitionLocations(data_path):
     subpath += last_dict[-2:]
     filter = {"_id": _id}
     res = root.find_one(filter)
-#     print(subpath)
     # if no such parent dict, Error
     if not res:
         raise ValueError('No such dict')
@@ -39,15 +38,12 @@ def cat_file(data_path):
 
     # read and combine all partitions from data collection
     file_content = []
-#     print(data_addresses)
     for i in range(len(data_addresses)):
         data_id = data_addresses['p'+str(i)]
         filter = {"_id": data_id}
         # cobine each partation content
         file_content.extend(data.find_one(filter)['content']) 
     return file_content
-
-
 
 
 def mapPartition_TikTok(file_path, partition_number):
@@ -66,16 +62,17 @@ def mapPartition_TikTok(file_path, partition_number):
         tiktok_songs.append(song['track_name'])
     
     rep = list(set(title).intersection(tiktok_songs))
-    return len(rep)
+    return rep
 
 def Reduce_Tiktok(file_path):
     addresses = getPartitionLocations(file_path)
-    count = 0
+    rep = []
     for key in addresses.keys():
-        count += mapPartition_TikTok(file_path, key)
-    return count
+        new = mapPartition_TikTok(file_path, key)
+        rep = list(set(rep + new))
+    return len(rep)
 
-def mapPartition_Spotify(file_path, partition):
+def mapPartition_Spotify(file_path, partition_number):
     data_addresses = getPartitionLocations(file_path)
     data_id = data_addresses[partition_number]
     filter = {"_id": data_id}
@@ -91,19 +88,20 @@ def mapPartition_Spotify(file_path, partition):
         spotify_songs.append(song['track_name'])
     
     rep = list(set(title).intersection(spotify_songs))
-    return len(rep)
+    return rep
 
 def Reduce_Spotify(file_path):
     addresses = getPartitionLocations(file_path)
-    count = 0
+    rep = []
     for key in addresses.keys():
-        count += mapPartition_Spotify(file_path, key)
-    return count
+        new = mapPartition_Spotify(file_path, key)
+        rep = list(set(rep + new))
+    return len(rep)
 
 file_path = '/pastHotSongs/documents/pastHotSongs.csv'
-partition_number = 'p2'
+partition_number = 'p5'
 print(mapPartition_TikTok(file_path, partition_number))
 print(Reduce_Tiktok(file_path))
-partition_number = 'p0'
+partition_number = 'p25'
 print(mapPartition_Spotify(file_path, partition_number))
 print(Reduce_Spotify(file_path))
