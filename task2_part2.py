@@ -62,15 +62,14 @@ def mapPartition_TikTok(file_path, partition_number):
         tiktok_songs.append(song['track_name'])
     
     rep = list(set(title).intersection(tiktok_songs))
-    return rep
+    return len(rep)
 
 def Reduce_Tiktok(file_path):
     addresses = getPartitionLocations(file_path)
-    rep = []
+    count = 0
     for key in addresses.keys():
-        new = mapPartition_TikTok(file_path, key)
-        rep = list(set(rep + new))
-    return len(rep)
+        count += mapPartition_TikTok(file_path, key)
+    return count
 
 def mapPartition_Spotify(file_path, partition_number):
     data_addresses = getPartitionLocations(file_path)
@@ -88,15 +87,14 @@ def mapPartition_Spotify(file_path, partition_number):
         spotify_songs.append(song['track_name'])
     
     rep = list(set(title).intersection(spotify_songs))
-    return rep
+    return len(rep)
 
 def Reduce_Spotify(file_path):
     addresses = getPartitionLocations(file_path)
-    rep = []
+    count = 0
     for key in addresses.keys():
-        new = mapPartition_Spotify(file_path, key)
-        rep = list(set(rep + new))
-    return len(rep)
+        count += mapPartition_Spotify(file_path, key)
+    return count
 
 file_path = '/pastHotSongs/documents/pastHotSongs.csv'
 partition_number = 'p5'
